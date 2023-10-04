@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "94130585461",
+    "project_id": "kolab-f0831",
+    "storage_bucket": "kolab-f0831.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:94130585461:android:51ef8c00a9a15f4ed2dd3c",
+        "android_client_info": {
+          "package_name": "com.example.kolab"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAA_iaUQg6qH9yWWvGE_qkxbrskiY8lEx4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
