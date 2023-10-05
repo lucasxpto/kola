@@ -15,47 +15,62 @@ class TelaInicial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Salas Disponíveis"), actions: [
-        FutureBuilder<Usuario?>(
-          future: authService.getCurrentUser(),
-          builder: (context, snapshot) {
-            List<Widget> actionButtons =
-                []; // Uma lista para guardar os botões de ação
+      appBar: AppBar(
+        title: Text("Salas Disponíveis"),
+        actions: [
+          FutureBuilder<Usuario?>(
+            future: authService.getCurrentUser(),
+            builder: (context, snapshot) {
+              List<Widget> actionButtons =
+                  []; // Uma lista para guardar os botões de ação
 
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.data != null) {
-                // Se o usuário for admin, adicione o botão de gerenciar salas
-                if (snapshot.data!.isAdmin) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.data != null) {
+                  // Se o usuário for admin, adicione o botão de gerenciar salas
+                  if (snapshot.data!.isAdmin) {
+                    actionButtons.add(IconButton(
+                      icon: Icon(Icons.admin_panel_settings),
+                      onPressed: () => Get.toNamed("/salas"),
+                      tooltip: "Gerenciar Salas",
+                    ));
+                  }
+
+                  // Adicione o botão de histórico para todos os usuários
                   actionButtons.add(IconButton(
-                    icon: Icon(Icons.admin_panel_settings),
-                    onPressed: () => Get.toNamed("/salas"),
-                    tooltip: "Gerenciar Salas",
+                    icon: Icon(Icons.history),
+                    onPressed: () {
+                      final HistoricoController historicoController =
+                          Get.put(HistoricoController());
+                      historicoController.loadHistoricos();
+                      Get.toNamed("/historico");
+                    },
+                    tooltip: "Consultar Histórico",
+                  ));
+
+                  // Adicione o botão de logoff
+                  actionButtons.add(IconButton(
+                    icon: Icon(Icons.logout),
+                    onPressed: () async {
+                      await authService.signOut();
+                      Get.offAllNamed(
+                          "/login"); // Navegue para a página de login ou para a página inicial depois de sair
+                    },
+                    tooltip: "Sair",
                   ));
                 }
-
-                // Adicione o botão de histórico para todos os usuários
-                actionButtons.add(IconButton(
-                  icon: Icon(Icons.history),
-                  onPressed: () {
-                    final HistoricoController historicoController = Get.put(HistoricoController());
-                    historicoController.loadHistoricos();
-                    Get.toNamed("/historico");
-                  },
-                  tooltip: "Consultar Histórico",
+              } else {
+                actionButtons.add(Padding(
+                  padding: EdgeInsets.all(10),
+                  child: CircularProgressIndicator(),
                 ));
               }
-            } else {
-              actionButtons.add(Padding(
-                padding: EdgeInsets.all(10),
-                child: CircularProgressIndicator(),
-              ));
-            }
 
-            return Row(
-                children: actionButtons); // Retorne a linha de botões de ação
-          },
-        ),
-      ]),
+              return Row(
+                  children: actionButtons); // Retorne a linha de botões de ação
+            },
+          ),
+        ],
+      ),
       body: Obx(() {
         if (salaController.isLoading.value) {
           return Center(child: CircularProgressIndicator());
