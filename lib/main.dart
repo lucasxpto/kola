@@ -7,6 +7,7 @@ import 'package:kolab/views/salas/salas_views.dart';
 import 'services/auth_service.dart';
 import 'views/auth/login_page_view.dart';
 import 'views/auth/register_page_view.dart';
+import 'views/salas/historico_view.dart';
 import 'views/salas/sala_detalhes_view.dart';
 import 'views/salas/tela_inicial_view.dart';
 
@@ -14,6 +15,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Get.put(AuthService());
   runApp(MyApp());
 }
 
@@ -48,6 +50,7 @@ class MyApp extends StatelessWidget {
           name: '/sala_detalhes/:id',
           page: () => SalaDetalhes(),
         ),
+        GetPage(name: '/historico', page: () => HistoricoScreen()),
       ],
     );
   }

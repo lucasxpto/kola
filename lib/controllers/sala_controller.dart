@@ -2,10 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../models/sala_model.dart';
+import '../models/usuario_model.dart';
+import '../services/auth_service.dart';
 
 class SalaController extends GetxController {
   var salas = <Sala>[].obs;
   var isLoading = true.obs;
+  final AuthService authService = Get.find<AuthService>();
 
   List<String> get recursosDisponiveis => [
         "Projetor",
@@ -115,9 +118,11 @@ class SalaController extends GetxController {
   Future<void> reservarSala(Sala sala) async {
     try {
       isLoading(true);
+      Usuario? currentUser = await authService.getCurrentUser();
       await FirebaseFirestore.instance.collection('salas').doc(sala.id).update({
         'isOcupada': true,
-        'startTime': FieldValue.serverTimestamp()
+        'startTime': FieldValue.serverTimestamp(),
+        'userId': currentUser?.id ?? 'Unknown',
       }); // Altera o campo para indicar que a sala está ocupada.
       await loadSalas();
     } catch (e) {
@@ -129,36 +134,42 @@ class SalaController extends GetxController {
       isLoading(false);
     }
   }
+    Future<void> finalizarSala(Sala sala) async {
+      final DateTime now = DateTime.now();
+      final int hoursUsed = now.difference(sala.startTime!).inHours;
 
-  Future<void> finalizarSala(Sala sala) async {
-  final DateTime now = DateTime.now();
-  final int hoursUsed = now.difference(sala.startTime!).inHours;
+      final double totalCost = hoursUsed * sala.custoPorHora;
 
-  final double totalCost = hoursUsed * sala.custoPorHora;
+      // Atualize a sala para marcar como não ocupada e limpe os campos relacionados à reserva
+      Sala salaFinalizada =
+          sala.copyWith(isOcupada: false, userId: null, startTime: null);
 
-  // Atualize a sala para marcar como não ocupada e limpe os campos relacionados à reserva
-  Sala salaFinalizada = sala.copyWith(isOcupada: false, userId: null, startTime: null);
+      try {
+        // Atualize a sala no Firestore
+        await FirebaseFirestore.instance
+            .collection('salas')
+            .doc(salaFinalizada.id)
+            .update(salaFinalizada.toMap());
 
-  try {
-    // Atualize a sala no Firestore
-    await FirebaseFirestore.instance
-        .collection('salas')
-        .doc(salaFinalizada.id)
-        .update(salaFinalizada.toMap());
+        await FirebaseFirestore.instance.collection('historicos').add({
+          'salaId': sala.id,
+          'salaNome': sala.nome,
+          'userId': sala.userId,
+          'startTime': sala.startTime,
+          'endTime': DateTime.now(),
+          'custo': totalCost
+        });
 
-    // Recarregue a lista de salas após a atualização
-    await loadSalas();
+        // Recarregue a lista de salas após a atualização
+        await loadSalas();
 
-    // Exiba o custo total ao usuário (você pode usar um diálogo, um Snackbar, etc.)
-    // Por exemplo:
-    Get.snackbar('Finalização', 'Sala finalizada. Custo total: R\$$totalCost',
-        snackPosition: SnackPosition.BOTTOM);
-  } catch (e) {
-    // Trate qualquer erro aqui
-    if (kDebugMode) {
-      print("Erro ao finalizar sala: $e");
+        // Navegue para a tela de histórico do usuário
+        Get.toNamed('/historico');
+      } catch (e) {
+        // Trate qualquer erro aqui
+        if (kDebugMode) {
+          print("Erro ao finalizar sala: $e");
+        }
+      }
     }
   }
-}
-
-}

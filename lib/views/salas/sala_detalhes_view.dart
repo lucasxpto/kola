@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../controllers/sala_controller.dart';
 import '../../models/sala_model.dart';
@@ -40,7 +41,8 @@ class SalaDetalhes extends StatelessWidget {
             Text("Capacidade: ${sala.capacidade}"),
             Text("Custo por hora: ${sala.custoPorHora}"),
             Text("Recursos: ${sala.recursos.join(", ")}"),
-            // Adicione mais informações da sala aqui
+            Text("Data de inicio: ${DateFormat('dd/MM/yyyy H:mm:ss').format(sala.startTime!)}"),
+
           ],
         ),
       ),
