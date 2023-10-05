@@ -10,7 +10,7 @@ import 'views/auth/register_page_view.dart';
 import 'views/salas/sala_detalhes_view.dart';
 import 'views/salas/tela_inicial_view.dart';
 
-Future<void> main() async {
+void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -26,14 +26,29 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AuthService().currentUser == null ? LoginPage() : TelaInicial(),
-      routes: {
-        '/login': (context) => LoginPage(),
-        '/register': (context) => RegisterPage(),
-        '/home': (context) => TelaInicial(),
-        '/salas': (context) => SalasPage(),
-        '/sala/detalhes': (context) => SalaDetalhesPage(),
-      },
+      initialRoute: AuthService().currentUser == null ? '/login' : '/home',
+      getPages: [
+        GetPage(
+          name: '/login',
+          page: () => LoginPage(),
+        ),
+        GetPage(
+          name: '/register',
+          page: () => RegisterPage(),
+        ),
+        GetPage(
+          name: '/home',
+          page: () => TelaInicial(),
+        ),
+        GetPage(
+          name: '/salas',
+          page: () => SalasPage(),
+        ),
+        GetPage(
+          name: '/sala_detalhes/:id',
+          page: () => SalaDetalhes(),
+        ),
+      ],
     );
   }
 }

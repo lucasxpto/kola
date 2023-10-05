@@ -48,25 +48,35 @@ class TelaInicial extends StatelessWidget {
                 title: Text(sala.nome),
                 subtitle: Text(
                     "Capacidade: ${sala.capacidade} - Custo por hora: ${sala.custoPorHora}"),
-                trailing: sala.isOcupada
-                    ? TextButton(
-                        child: Text("Ocupada",
-                            style: TextStyle(color: Colors.white)),
-                        style:
-                            TextButton.styleFrom(backgroundColor: Colors.red),
-                        onPressed: null, // desabilita a função de clique
-                      )
-                    : ElevatedButton(
-                        child: Text("Reservar",
-                            style: TextStyle(color: Colors.white)),
-                            style: TextButton.styleFrom(backgroundColor: Colors.green),
-                        onPressed: () {
-                          salaController.reservarSala(sala);
-                          Get.snackbar('Reserva', 'Sala Reservada com sucesso!',
-                              snackPosition: SnackPosition.BOTTOM);
-                        },
-                      ),
-                      
+                trailing: Row(
+                  mainAxisSize: MainAxisSize
+                      .min, // Garante que os botões não ocupem toda a largura
+                  children: [
+                    sala.isOcupada
+                        ? TextButton(
+                            child: Text("Ocupada",
+                                style: TextStyle(color: Colors.white)),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.red),
+                            onPressed: null, // desabilita a função de clique
+                          )
+                        : ElevatedButton(
+                            child: Text("Reservar",
+                                style: TextStyle(color: Colors.white)),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.green),
+                            onPressed: () {
+                              salaController.reservarSala(sala);
+                              Get.snackbar(
+                                  'Reserva', 'Sala Reservada com sucesso!',
+                                  snackPosition: SnackPosition.BOTTOM);
+                            },
+                          ),
+                  ],
+                ),
+                onTap: () {
+                  Get.toNamed("/sala_detalhes/${sala.id}", arguments: sala);
+                },
               );
             },
           );

@@ -131,27 +131,34 @@ class SalaController extends GetxController {
   }
 
   Future<void> finalizarSala(Sala sala) async {
-    try {
-      isLoading(true);
-      final DateTime now = DateTime.now();
-      final int hoursUsed = now.difference(sala.startTime!).inHours;
-      final double totalCost = hoursUsed * sala.custoPorHora;
+  final DateTime now = DateTime.now();
+  final int hoursUsed = now.difference(sala.startTime!).inHours;
 
-      await FirebaseFirestore.instance
-          .collection('salas')
-          .doc(sala.id)
-          .update({'isOcupada': false, 'startTime': null});
+  final double totalCost = hoursUsed * sala.custoPorHora;
 
-      // Realize a lógica para registrar o custo total, por exemplo, salvando-o no Firestore ou em outro local adequado.
+  // Atualize a sala para marcar como não ocupada e limpe os campos relacionados à reserva
+  Sala salaFinalizada = sala.copyWith(isOcupada: false, userId: null, startTime: null);
 
-      await loadSalas();
-    } catch (e) {
-      if (kDebugMode) {
-        print("Erro ao finalizar sala: $e");
-      }
-      // Mostra uma mensagem de erro ao usuário com Get.snackbar ou outro método.
-    } finally {
-      isLoading(false);
+  try {
+    // Atualize a sala no Firestore
+    await FirebaseFirestore.instance
+        .collection('salas')
+        .doc(salaFinalizada.id)
+        .update(salaFinalizada.toMap());
+
+    // Recarregue a lista de salas após a atualização
+    await loadSalas();
+
+    // Exiba o custo total ao usuário (você pode usar um diálogo, um Snackbar, etc.)
+    // Por exemplo:
+    Get.snackbar('Finalização', 'Sala finalizada. Custo total: R\$$totalCost',
+        snackPosition: SnackPosition.BOTTOM);
+  } catch (e) {
+    // Trate qualquer erro aqui
+    if (kDebugMode) {
+      print("Erro ao finalizar sala: $e");
     }
   }
+}
+
 }
